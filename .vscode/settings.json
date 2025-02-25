@@ -1,0 +1,6 @@
+{
+    "C_Cpp.default.compilerPath": "d:\\1. Pemrograman\\A. Arduino Uno\\sketch.ino",
+    "sketch": "sketch.ino",
+    "output": "build",
+    "board": "arduino:avr:uno"
+}
