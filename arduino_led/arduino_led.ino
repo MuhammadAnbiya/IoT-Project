@@ -2,6 +2,10 @@ const int led1 = 9;  // LED untuk 1 jari
 const int led2 = 10; // LED untuk 3 jari
 const int led3 = 11; // LED untuk 5 jari
 
+bool led1_state = false;
+bool led2_state = false;
+bool led3_state = false;
+
 void setup() {
     pinMode(led1, OUTPUT);
     pinMode(led2, OUTPUT);
@@ -12,27 +16,29 @@ void setup() {
 void loop() {
     if (Serial.available() > 0) {
         char received = Serial.read();
-        
-        // Matikan semua LED terlebih dahulu
-        digitalWrite(led1, LOW);
-        digitalWrite(led2, LOW);
-        digitalWrite(led3, LOW);
 
-        // Nyalakan LED berdasarkan input dari Python
+        // Jika '1' diterima, nyalakan LED1 tanpa mematikan lainnya
         if (received == '1') {
-            digitalWrite(led1, HIGH);
+            led1_state = true;
         } 
+        // Jika '3' diterima, nyalakan LED2 tanpa mematikan lainnya
         else if (received == '3') {
-            digitalWrite(led2, HIGH);
+            led2_state = true;
         } 
+        // Jika '5' diterima, nyalakan LED3 tanpa mematikan lainnya
         else if (received == '5') {
-            digitalWrite(led3, HIGH);
+            led3_state = true;
         } 
+        // Jika '0' diterima (10 jari), matikan semua LED
         else if (received == '0') {
-            // Semua LED mati jika terbaca 10 jari
-            digitalWrite(led1, LOW);
-            digitalWrite(led2, LOW);
-            digitalWrite(led3, LOW);
+            led1_state = false;
+            led2_state = false;
+            led3_state = false;
         }
+
+        // Perbarui status LED
+        digitalWrite(led1, led1_state ? HIGH : LOW);
+        digitalWrite(led2, led2_state ? HIGH : LOW);
+        digitalWrite(led3, led3_state ? HIGH : LOW);
     }
 }
