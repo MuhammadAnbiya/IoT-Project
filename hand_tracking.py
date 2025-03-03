@@ -5,7 +5,7 @@ import serial
 import time
 
 # Inisialisasi komunikasi serial ke Arduino (ubah COM sesuai port Arduino)
-ser = serial.Serial('COM5', 9600, timeout=1)  # Untuk Linux/Mac gunakan '/dev/ttyUSB0'
+ser = serial.Serial('COM7', 9600, timeout=1)  # Untuk Linux/Mac gunakan '/dev/ttyUSB0'
 
 # Inisialisasi Mediapipe untuk deteksi tangan
 mp_hands = mp.solutions.hands
