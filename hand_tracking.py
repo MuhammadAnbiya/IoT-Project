@@ -4,7 +4,9 @@ import serial
 import time
 
 # Inisialisasi komunikasi serial ke Arduino (ubah COM sesuai dengan yang digunakan)
-ser = serial.Serial('COM7', 9600, timeout=1)
+# ser = serial.Serial('COM7', 9600, timeout=1)
+ser = serial.Serial('/dev/ttyUSB0', 9600, timeout=1)
+
 
 # Inisialisasi Mediapipe untuk deteksi tangan
 mp_hands = mp.solutions.hands
