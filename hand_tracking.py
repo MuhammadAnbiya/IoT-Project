@@ -1,4 +1,3 @@
-
 import cv2
 import mediapipe as mp
 import serial
@@ -14,6 +13,9 @@ mp_draw = mp.solutions.drawing_utils
 
 # Menggunakan kamera laptop
 cap = cv2.VideoCapture(0)
+
+# Status lampu (0: mati, 1: nyala)
+lamp_states = [0, 0, 0]
 
 while cap.isOpened():
     ret, frame = cap.read()
@@ -35,17 +37,25 @@ while cap.isOpened():
             finger_tips = [8, 12, 16]  # ID landmark ujung jari (telunjuk, tengah, manis)
             finger_bases = [6, 10, 14] # ID landmark pangkal jari
             
-            for tip, base in zip(finger_tips, finger_bases):
+            for i, (tip, base) in enumerate(zip(finger_tips, finger_bases)):
                 if hand_landmarks.landmark[tip].y < hand_landmarks.landmark[base].y:
+                    lamp_states[i] = 1  # Nyalakan lampu
                     finger_count += 1  # Tambah jumlah jari yang terangkat
 
-    # Kirim data ke Arduino
-    ser.write(str(finger_count).encode())  
-
+            # Cek jika lima jari terangkat (termasuk ibu jari dan kelingking)
+            all_fingers_tips = [4, 8, 12, 16, 20]  # Semua ujung jari
+            all_fingers_bases = [2, 6, 10, 14, 18]
+            
+            if all(hand_landmarks.landmark[t].y < hand_landmarks.landmark[b].y for t, b in zip(all_fingers_tips, all_fingers_bases)):
+                lamp_states = [0, 0, 0]  # Matikan semua lampu
+    
+    # Kirim status lampu ke Arduino
+    ser.write(f"{lamp_states[0]},{lamp_states[1]},{lamp_states[2]}".encode())  
+    
     # Tampilkan jumlah jari di layar
     cv2.putText(frame, f"Jari: {finger_count}", (50, 100), 
                 cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-
+    
     cv2.imshow("Hand Tracking", frame)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
