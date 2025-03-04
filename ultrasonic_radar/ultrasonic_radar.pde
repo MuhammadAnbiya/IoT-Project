@@ -1,8 +1,12 @@
-import processing.serial.*; // Import library untuk komunikasi serial
+import processing.serial.*;
+import ddf.minim.*;  // Import library untuk audio
 import java.awt.event.KeyEvent; 
 import java.io.IOException;
 
-Serial myPort; // Objek Serial
+Serial myPort;
+Minim minim;         // Objek untuk audio
+AudioPlayer sound;   // Pemutar audio
+
 String angle = "";
 String distance = "";
 String data = "";
@@ -13,12 +17,16 @@ int index1 = 0;
 
 // Setup program
 void setup() {
-  size(1200, 700); // Sesuaikan dengan resolusi layar
+  size(1200, 700);
   smooth();
   
-  // Pastikan port sudah benar (Cek di Tools -> Port)
+  // Inisialisasi port serial
   myPort = new Serial(this, "/dev/ttyUSB0", 9600); 
-  myPort.bufferUntil('.'); // Membaca data sampai karakter '.'
+  myPort.bufferUntil('.');
+
+  // Inisialisasi audio
+  minim = new Minim(this);
+  sound = minim.loadFile("/media/muhammadanbiya/Data 2/1. A Semester 4/1. Internet of Things/Ultrasonic_radar/sound/tembak.mpeg");
 }
 
 // Loop utama
@@ -39,10 +47,10 @@ void draw() {
 void serialEvent(Serial myPort) { 
   data = myPort.readStringUntil('.');
   if (data != null) {
-    data = trim(data); // Bersihkan spasi
+    data = trim(data);
     index1 = data.indexOf(",");
 
-    if (index1 > 0) { // Pastikan format data benar
+    if (index1 > 0) {
       try {
         angle = data.substring(0, index1);
         distance = data.substring(index1 + 1);
@@ -53,29 +61,6 @@ void serialEvent(Serial myPort) {
       }
     }
   }
-}
-
-// Gambar radar
-void drawRadar() {
-  pushMatrix();
-  translate(width/2, height - height * 0.074);
-  noFill();
-  strokeWeight(2);
-  stroke(98, 245, 31);
-
-  // Gambar lingkaran
-  for (float r = width * 0.0625; r <= width * 0.687; r += width * 0.207) {
-    arc(0, 0, r, r, PI, TWO_PI);
-  }
-  
-  // Gambar garis sudut
-  for (int a = 0; a <= 150; a += 30) {
-    float x = (-width / 2) * cos(radians(a));
-    float y = (-width / 2) * sin(radians(a));
-    line(0, 0, x, y);
-  }
-  
-  popMatrix();
 }
 
 // Gambar objek yang terdeteksi
@@ -95,6 +80,12 @@ void drawObject() {
     line(x1, y1, x2, y2);
   }
   
+  // **Logic untuk memainkan suara jika jarak ≤ 10 cm**
+  if (iDistance <= 10 && !sound.isPlaying()) {
+    sound.rewind();  // Restart audio dari awal
+    sound.play();
+  }
+
   popMatrix();
 }
 
@@ -120,7 +111,6 @@ void drawText() {
   fill(98, 245, 31);
   textSize(25);
   
-  // Menampilkan jarak dalam cm
   text("10cm", width * 0.6146, height - height * 0.0833);
   text("20cm", width * 0.719, height - height * 0.0833);
   text("30cm", width * 0.823, height - height * 0.0833);
@@ -132,4 +122,11 @@ void drawText() {
   text("Distance: " + (iDistance < 40 ? iDistance + " cm" : ""), width * 0.775, height - height * 0.0277);
 
   popMatrix();
+}
+
+// **Hentikan audio saat keluar**
+void stop() {
+  sound.close();
+  minim.stop();
+  super.stop();
 }
